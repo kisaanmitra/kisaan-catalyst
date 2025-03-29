@@ -7,18 +7,16 @@ interface TestimonialCardProps {
   name: string;
   location: string;
   image: string;
-  testimony: string;
-  rating: number;
-  crop: string;
+  quote: string;
+  englishQuote: string;
 }
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({
   name,
   location,
   image,
-  testimony,
-  rating,
-  crop
+  quote,
+  englishQuote
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -38,22 +36,14 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
           <div>
             <CardTitle className="text-lg">{name}</CardTitle>
             <CardDescription>
-              {location} • {crop} Farmer
+              {location}
             </CardDescription>
-            <div className="flex mt-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={14}
-                  className={i < rating ? "text-yellow-500 fill-current" : "text-gray-300"}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-4 flex-grow">
-        <p className="text-gray-600 dark:text-gray-400 text-sm italic">"{testimony}"</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm font-noto mb-3">{quote}</p>
+        <p className="text-gray-600 dark:text-gray-400 text-xs italic">{englishQuote}</p>
       </CardContent>
       <CardFooter className="text-xs text-gray-500 justify-end border-t pt-3">
         <span>KisaanMitra user since 2023</span>

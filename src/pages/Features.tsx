@@ -19,40 +19,50 @@ const Features = () => {
       englishTitle: "GIS Farm Planner",
       description: "आपकी फसल के लिए सटीक भूमि मैपिंग और योजना बनाएं",
       englishDescription: "Precise land mapping and planning for your crops",
-      icon: <MapPin className="h-12 w-12 text-primary" />,
+      icon: <MapPin className="h-6 w-6" />,
       color: "bg-green-50",
+      buttonText: "Try Demo",
+      buttonHindi: "डेमो देखें"
     },
     {
       title: "क्रेडिट आधारित बाज़ार",
       englishTitle: "Credit-Based Marketplace",
       description: "बिना नकद के बीज, खाद और उपकरण खरीदें",
       englishDescription: "Buy seeds, fertilizers, and equipment without cash",
-      icon: <CreditCard className="h-12 w-12 text-primary" />,
+      icon: <CreditCard className="h-6 w-6" />,
       color: "bg-blue-50",
+      buttonText: "Learn More",
+      buttonHindi: "अधिक जानें"
     },
     {
       title: "मौसम और मंडी अपडेट",
       englishTitle: "Weather & Mandi Updates",
       description: "वास्तविक समय मौसम और बाज़ार मूल्य अलर्ट",
       englishDescription: "Real-time weather and market price alerts",
-      icon: <Cloud className="h-12 w-12 text-primary" />,
+      icon: <Cloud className="h-6 w-6" />,
       color: "bg-yellow-50",
+      buttonText: "View Updates",
+      buttonHindi: "अपडेट देखें"
     },
     {
       title: "AI सलाहकार",
       englishTitle: "AI Advisor",
       description: "सटीक फसल सलाह के लिए AI आधारित चैटबॉट",
       englishDescription: "AI-powered chatbot for precise crop advice",
-      icon: <MessageSquare className="h-12 w-12 text-primary" />,
+      icon: <MessageSquare className="h-6 w-6" />,
       color: "bg-purple-50",
+      buttonText: "Ask Questions",
+      buttonHindi: "प्रश्न पूछें"
     },
     {
       title: "सब्सिडी खोजक",
       englishTitle: "Subsidy Finder",
       description: "आपके राज्य और फसल के लिए उपलब्ध सरकारी योजनाएँ",
       englishDescription: "Discover government schemes for your state and crop",
-      icon: <Calculator className="h-12 w-12 text-primary" />,
+      icon: <Calculator className="h-6 w-6" />,
       color: "bg-red-50",
+      buttonText: "Find Schemes",
+      buttonHindi: "योजनाएँ देखें"
     },
   ];
 
@@ -82,6 +92,9 @@ const Features = () => {
                   englishDescription={feature.englishDescription}
                   icon={feature.icon}
                   color={feature.color}
+                  buttonText={feature.buttonText}
+                  buttonHindi={feature.buttonHindi}
+                  onClick={() => console.log(`Clicked on ${feature.title}`)}
                 />
               ))}
             </div>

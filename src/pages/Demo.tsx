@@ -69,7 +69,11 @@ const Demo = () => {
                       अपने किसानमित्र क्रेडिट ट्रैक करें और मार्केटप्लेस में उपयोग करें
                     </p>
                   </div>
-                  <CreditTracker />
+                  <CreditTracker 
+                    totalCredits={500}
+                    usedCredits={175}
+                    pendingCredits={50}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="live-data" className="p-4 md:p-6">
@@ -79,7 +83,7 @@ const Demo = () => {
                       वास्तविक समय मौसम और मंडी मूल्य अपडेट प्राप्त करें
                     </p>
                   </div>
-                  <LiveDataWidget />
+                  <LiveDataWidget widgetType="weather" />
                 </TabsContent>
               </CardContent>
             </Card>

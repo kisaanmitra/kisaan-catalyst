@@ -30,7 +30,7 @@ interface LiveDataWidgetProps {
   widgetType: 'weather' | 'mandi';
 }
 
-const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ widgetType }) => {
+const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ widgetType = 'weather' }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {

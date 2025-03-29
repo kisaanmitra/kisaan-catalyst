@@ -5,25 +5,23 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from 'lucide-react';
 
 interface GovernmentSchemeProps {
-  name: string;
-  nameHindi?: string;
+  title: string;
   description: string;
-  ministry: string;
-  eligibility: string[];
-  benefits: string[];
-  link: string;
+  englishDescription: string;
+  benefits: string;
+  eligibility: string;
   logo: string;
+  link: string;
 }
 
 const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
-  name,
-  nameHindi,
+  title,
   description,
-  ministry,
-  eligibility,
+  englishDescription,
   benefits,
-  link,
-  logo
+  eligibility,
+  logo,
+  link
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
@@ -32,7 +30,7 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
           <div className="w-16 h-16 p-2 bg-white rounded-md overflow-hidden border border-gray-200 flex items-center justify-center">
             <img 
               src={logo} 
-              alt={name} 
+              alt={title} 
               className="max-w-full max-h-full object-contain"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -41,36 +39,24 @@ const GovernmentScheme: React.FC<GovernmentSchemeProps> = ({
             />
           </div>
           <div>
-            <CardTitle className="text-lg">{name}</CardTitle>
-            {nameHindi && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-noto">{nameHindi}</p>
-            )}
+            <CardTitle className="text-lg">{title}</CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-noto">{description}</p>
             <CardDescription>
-              {ministry}
+              {englishDescription}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-4 flex-grow">
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{description}</p>
-        
         <div className="space-y-3">
           <div>
             <h4 className="text-sm font-medium mb-1">Eligibility:</h4>
-            <ul className="text-gray-600 dark:text-gray-400 text-xs list-disc pl-5 space-y-1">
-              {eligibility.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+            <p className="text-gray-600 dark:text-gray-400 text-xs">{eligibility}</p>
           </div>
           
           <div>
             <h4 className="text-sm font-medium mb-1">Benefits:</h4>
-            <ul className="text-gray-600 dark:text-gray-400 text-xs list-disc pl-5 space-y-1">
-              {benefits.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
+            <p className="text-gray-600 dark:text-gray-400 text-xs">{benefits}</p>
           </div>
         </div>
       </CardContent>

@@ -6,42 +6,47 @@ import { LucideIcon } from 'lucide-react';
 
 interface FeatureCardProps {
   title: string;
-  titleHindi?: string;
+  englishTitle?: string;
   description: string;
-  icon: LucideIcon;
+  englishDescription?: string;
+  icon: React.ReactNode;
   color: string;
-  buttonText: string;
+  buttonText?: string;
   buttonHindi?: string;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
   title,
-  titleHindi,
+  englishTitle,
   description,
-  icon: Icon,
+  englishDescription,
+  icon,
   color,
-  buttonText,
+  buttonText = "Learn More",
   buttonHindi,
-  onClick
+  onClick = () => {}
 }) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-      <CardHeader className={`bg-${color}/10`}>
+      <CardHeader className={color}>
         <div className="flex items-center space-x-2">
-          <div className={`p-2 rounded-full bg-${color} text-white`}>
-            <Icon size={24} />
+          <div className="p-2 rounded-full bg-white/90 text-primary">
+            {icon}
           </div>
           <div>
             <CardTitle className="text-lg">{title}</CardTitle>
-            {titleHindi && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-noto">{titleHindi}</p>
+            {englishTitle && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-noto">{englishTitle}</p>
             )}
           </div>
         </div>
       </CardHeader>
       <CardContent className="py-4 flex-grow">
-        <CardDescription className="text-foreground/80 text-sm">{description}</CardDescription>
+        <p className="text-foreground/80 text-sm mb-2">{description}</p>
+        {englishDescription && (
+          <p className="text-foreground/60 text-xs">{englishDescription}</p>
+        )}
       </CardContent>
       <CardFooter className="pt-0">
         <Button 
