@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Sun, Moon, ChevronDown } from 'lucide-react';
@@ -8,7 +7,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
-const Header = ({ toggleContrast, isHighContrast }: { toggleContrast?: () => void, isHighContrast?: boolean }) => {
+interface HeaderProps {
+  toggleContrast?: () => void;
+  isHighContrast?: boolean;
+  language?: "english" | "hindi" | "kannada";
+  setLanguage?: React.Dispatch<React.SetStateAction<"english" | "hindi" | "kannada">>;
+}
+
+const Header: React.FC<HeaderProps> = ({ 
+  toggleContrast, 
+  isHighContrast,
+  language,
+  setLanguage
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -136,6 +147,28 @@ const Header = ({ toggleContrast, isHighContrast }: { toggleContrast?: () => voi
                   {isHighContrast ? 'Normal Contrast' : 'High Contrast'}
                 </Button>
               )}
+
+              {language && setLanguage && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      {language === 'english' ? 'English' : 
+                       language === 'hindi' ? 'हिंदी' : 'ಕನ್ನಡ'}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setLanguage('english')}>
+                      English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLanguage('hindi')}>
+                      हिंदी
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLanguage('kannada')}>
+                      ಕನ್ನಡ
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
             
             {user ? (
@@ -241,6 +274,44 @@ const Header = ({ toggleContrast, isHighContrast }: { toggleContrast?: () => voi
               >
                 {isHighContrast ? 'Normal Contrast' : 'High Contrast'}
               </Button>
+            )}
+
+            {language && setLanguage && (
+              <div className="py-2">
+                <p className="px-3 text-sm text-gray-500 dark:text-gray-400 mb-1">Language / भाषा</p>
+                <div className="flex space-x-2 px-3">
+                  <Button 
+                    size="sm" 
+                    variant={language === 'english' ? 'default' : 'outline'}
+                    onClick={() => {
+                      setLanguage('english');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    English
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant={language === 'hindi' ? 'default' : 'outline'}
+                    onClick={() => {
+                      setLanguage('hindi');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    हिंदी
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant={language === 'kannada' ? 'default' : 'outline'}
+                    onClick={() => {
+                      setLanguage('kannada');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    ಕನ್ನಡ
+                  </Button>
+                </div>
+              </div>
             )}
             
             {user ? (

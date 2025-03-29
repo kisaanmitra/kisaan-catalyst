@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [farmerProfile, setFarmerProfile] = useState<any>(null);
   const [hasProfile, setHasProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -85,6 +86,10 @@ const Dashboard = () => {
       description: "Your farmer profile has been updated successfully.",
     });
   };
+
+  const navigateToTab = (tabName: string) => {
+    setActiveTab(tabName);
+  };
   
   if (loading) {
     return (
@@ -124,7 +129,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ) : (
-            <Tabs defaultValue="overview" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid grid-cols-4 w-full max-w-md">
                 <TabsTrigger value="overview">ओवरव्यू (Overview)</TabsTrigger>
                 <TabsTrigger value="profile">प्रोफ़ाइल (Profile)</TabsTrigger>
@@ -172,7 +177,7 @@ const Dashboard = () => {
                       </dl>
                     </CardContent>
                     <CardFooter>
-                      <Button variant="outline" onClick={() => document.querySelector('button[value="profile"]')?.click()}>
+                      <Button variant="outline" onClick={() => navigateToTab("profile")}>
                         प्रोफ़ाइल संपादित करें (Edit Profile)
                       </Button>
                     </CardFooter>
@@ -187,7 +192,7 @@ const Dashboard = () => {
                     <LoanApplicationList userId={user?.id} limit={3} />
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline" onClick={() => document.querySelector('button[value="history"]')?.click()}>
+                    <Button variant="outline" onClick={() => navigateToTab("history")}>
                       सभी आवेदन देखें (View All Applications)
                     </Button>
                   </CardFooter>

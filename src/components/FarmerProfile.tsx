@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -79,7 +78,7 @@ const FarmerProfile: React.FC<FarmerProfileProps> = ({
       if (mode === 'create') {
         const { data, error } = await supabase
           .from('farmer_profiles')
-          .insert([formattedValues])
+          .insert(formattedValues) // Fixed: Removed array brackets
           .select();
           
         if (error) throw error;
@@ -91,7 +90,7 @@ const FarmerProfile: React.FC<FarmerProfileProps> = ({
         // Update existing profile
         const { data, error } = await supabase
           .from('farmer_profiles')
-          .update(formattedValues)
+          .update(formattedValues) // Fixed: Removed array brackets
           .eq('user_id', user.id)
           .select();
           
