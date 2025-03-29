@@ -1,234 +1,271 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Sun, Moon, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sun, Moon, Volume2, UserCircle, Globe } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
-interface HeaderProps {
-  toggleContrast: () => void;
-  isHighContrast: boolean;
-  language?: 'english' | 'hindi' | 'kannada';
-  setLanguage?: (lang: 'english' | 'hindi' | 'kannada') => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ 
-  toggleContrast, 
-  isHighContrast, 
-  language = 'english', 
-  setLanguage = () => {} 
-}) => {
+const Header = ({ toggleContrast, isHighContrast }: { toggleContrast?: () => void, isHighContrast?: boolean }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+  const [user, setUser] = useState<any>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
-  };
-
-  const activateVoiceNavigation = () => {
-    // This would connect to a speech recognition API
-    alert("Voice navigation activated. Please speak your command.");
-  };
-
-  const getNavText = (key: string) => {
-    const texts: Record<string, Record<'english' | 'hindi' | 'kannada', string>> = {
-      home: {
-        english: 'Home',
-        hindi: 'होम',
-        kannada: 'ಮುಖಪುಟ'
-      },
-      features: {
-        english: 'Features',
-        hindi: 'विशेषताएँ',
-        kannada: 'ವೈಶಿಷ್ಟ್ಯಗಳು'
-      },
-      demo: {
-        english: 'Demo',
-        hindi: 'डेमो',
-        kannada: 'ಡೆಮೋ'
-      },
-      stories: {
-        english: 'Farmer Stories',
-        hindi: 'किसान कहानियां',
-        kannada: 'ರೈತರ ಕಥೆಗಳು'
-      },
-      government: {
-        english: 'Government Tie-Ups',
-        hindi: 'सरकारी योजनाएँ',
-        kannada: 'ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು'
-      },
-      signIn: {
-        english: 'Sign In',
-        hindi: 'प्रवेश करें',
-        kannada: 'ಸೈನ್ ಇನ್'
-      },
-      signUp: {
-        english: 'Join Now',
-        hindi: 'अभी जुड़ें',
-        kannada: 'ಈಗ ಸೇರಿ'
-      }
-    };
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
     
-    return texts[key][language];
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "साइन आउट सफल (Sign Out Successful)",
+        description: "आप सफलतापूर्वक साइन आउट हो गए हैं (You have been successfully signed out)"
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        variant: "destructive",
+        title: "साइन आउट विफल (Sign Out Failed)",
+        description: "साइन आउट करने में समस्या हुई (There was a problem signing out)"
+      });
+    }
+  };
+
+  const navigationLinks = [
+    { name: 'मुख्य पृष्ठ (Home)', path: '/' },
+    { name: 'विशेषताएँ (Features)', path: '/features' },
+    { name: 'डेमो (Demo)', path: '/demo' },
+    { name: 'किसानों की कहानियां (Stories)', path: '/stories' },
+    { name: 'सरकारी योजनाएँ (Government Schemes)', path: '/government' },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-900 shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
+    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-primary text-xl font-bold mr-1">Kisaan</span>
-              <span className="text-primary-dark text-xl font-bold">Mitra</span>
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <img className="h-8 w-auto" src="/farm-logo.png" alt="KisaanMitra Logo" />
+              <span className="ml-2 text-xl font-bold text-primary">किसानमित्र</span>
             </Link>
-            <span className="ml-2 text-xs text-gray-500 hidden sm:block">
-              {language === 'english' 
-                ? 'Your companion, your crop'
-                : (language === 'hindi' 
-                  ? 'आपका साथी, आपकी फ़सल'
-                  : 'ನಿಮ್ಮ ಸಂಗಾತಿ, ನಿಮ್ಮ ಬೆಳೆ')}
-            </span>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-4">
-            <Link to="/" className="text-gray-700 dark:text-gray-200 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-              {getNavText('home')}
-            </Link>
-            <Link to="/features" className="text-gray-700 dark:text-gray-200 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-              {getNavText('features')}
-            </Link>
-            <Link to="/demo" className="text-gray-700 dark:text-gray-200 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-              {getNavText('demo')}
-            </Link>
-            <Link to="/stories" className="text-gray-700 dark:text-gray-200 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-              {getNavText('stories')}
-            </Link>
-            <Link to="/government" className="text-gray-700 dark:text-gray-200 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-              {getNavText('government')}
-            </Link>
+          <nav className="hidden md:flex space-x-4 items-center">
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  location.pathname === link.path
+                    ? 'text-primary bg-green-50 dark:bg-green-900/20'
+                    : 'text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+            
+            {user && (
+              <Link
+                to="/dashboard"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  location.pathname === '/dashboard'
+                    ? 'text-primary bg-green-50 dark:bg-green-900/20'
+                    : 'text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white'
+                }`}
+              >
+                डैशबोर्ड (Dashboard)
+              </Link>
+            )}
+            
+            <div className="flex items-center gap-2 ml-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleDarkMode}
+                aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              
+              {toggleContrast && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleContrast}
+                  aria-label={isHighContrast ? 'Switch to normal contrast' : 'Switch to high contrast'}
+                  className="text-xs"
+                >
+                  {isHighContrast ? 'Normal Contrast' : 'High Contrast'}
+                </Button>
+              )}
+            </div>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-2 flex items-center gap-1">
+                    <span className="truncate max-w-[100px]">
+                      {user.email ? user.email.split('@')[0] : 'User'}
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="cursor-pointer">
+                      डैशबोर्ड (Dashboard)
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    साइन आउट (Sign Out)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center ml-2">
+                <Link to="/sign-in">
+                  <Button variant="outline" size="sm" className="mr-2">
+                    साइन इन (Sign In)
+                  </Button>
+                </Link>
+                <Link to="/sign-up">
+                  <Button size="sm">साइन अप (Sign Up)</Button>
+                </Link>
+              </div>
+            )}
           </nav>
 
-          {/* Accessibility & User Actions */}
-          <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button 
-                  className="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 mr-1"
-                  aria-label="Change Language"
-                >
-                  <Globe size={20} />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLanguage('english')}>
-                  English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage('hindi')}>
-                  हिन्दी (Hindi)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage('kannada')}>
-                  ಕನ್ನಡ (Kannada)
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <button 
-              onClick={activateVoiceNavigation}
-              className="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 mr-1"
-              aria-label="Voice Navigation"
-            >
-              <Volume2 size={20} />
-            </button>
-            
-            <button 
-              onClick={toggleContrast}
-              className="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 mr-1"
-              aria-label={isHighContrast ? "Disable High Contrast" : "Enable High Contrast"}
-            >
-              <span className="text-xs font-medium">HC</span>
-            </button>
-            
-            <button 
+          {/* Mobile menu button */}
+          <div className="flex items-center md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={toggleDarkMode}
-              className="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2"
-              aria-label={isDarkMode ? "Light Mode" : "Dark Mode"}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
             
-            <Link to="/sign-in" className="hidden sm:flex mr-2">
-              <Button variant="outline">
-                <UserCircle size={18} className="mr-1" />
-                <span className="text-sm">{getNavText('signIn')}</span>
-              </Button>
-            </Link>
-            
-            <Link to="/sign-up">
-              <Button className="bg-primary hover:bg-primary-dark text-white">
-                <span className="text-sm">{getNavText('signUp')}</span>
-              </Button>
-            </Link>
-            
-            {/* Mobile menu button */}
-            <button 
-              onClick={toggleMobileMenu}
-              className="ml-2 md:hidden p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-label="Open Menu"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Open menu"
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 shadow-md">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link to="/" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('home')}
-            </Link>
-            <Link to="/features" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('features')}
-            </Link>
-            <Link to="/demo" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('demo')}
-            </Link>
-            <Link to="/stories" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('stories')}
-            </Link>
-            <Link to="/government" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('government')}
-            </Link>
-            <Link to="/sign-in" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('signIn')}
-            </Link>
-            <Link to="/sign-up" className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              {getNavText('signUp')}
-            </Link>
-            <div className="pt-4 pb-1 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center px-3">
-                <div className="text-gray-600 dark:text-gray-300">
-                  {language === 'english' 
-                    ? 'Your companion, your crop'
-                    : (language === 'hindi' 
-                      ? 'आपका साथी, आपकी फ़सल'
-                      : 'ನಿಮ್ಮ ಸಂಗಾತಿ, ನಿಮ್ಮ ಬೆಳೆ')}
-                </div>
+      {/* Mobile menu */}
+      {isMobile && mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-900 shadow-lg">
+            {navigationLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname === link.path
+                    ? 'text-primary bg-green-50 dark:bg-green-900/20'
+                    : 'text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
+            
+            {user && (
+              <Link
+                to="/dashboard"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  location.pathname === '/dashboard'
+                    ? 'text-primary bg-green-50 dark:bg-green-900/20'
+                    : 'text-gray-700 hover:text-primary dark:text-gray-300 dark:hover:text-white'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                डैशबोर्ड (Dashboard)
+              </Link>
+            )}
+            
+            {toggleContrast && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  toggleContrast();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-start text-left px-3 py-2 rounded-md text-base font-medium"
+              >
+                {isHighContrast ? 'Normal Contrast' : 'High Contrast'}
+              </Button>
+            )}
+            
+            {user ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  handleSignOut();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full justify-start text-left px-3 py-2 rounded-md text-base font-medium"
+              >
+                साइन आउट (Sign Out)
+              </Button>
+            ) : (
+              <div className="flex flex-col space-y-2 pt-2">
+                <Link to="/sign-in" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    साइन इन (Sign In)
+                  </Button>
+                </Link>
+                <Link to="/sign-up" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full">साइन अप (Sign Up)</Button>
+                </Link>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

@@ -9,7 +9,87 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      farmer_profiles: {
+        Row: {
+          address: string
+          created_at: string
+          credit_score: number
+          crop_type: string
+          id: string
+          land_size: number
+          location: string
+          name: string
+          phone: string
+          profile_image: string | null
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          credit_score?: number
+          crop_type: string
+          id?: string
+          land_size: number
+          location: string
+          name: string
+          phone: string
+          profile_image?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          credit_score?: number
+          crop_type?: string
+          id?: string
+          land_size?: number
+          location?: string
+          name?: string
+          phone?: string
+          profile_image?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      loan_applications: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          created_at: string
+          credit_score_at_application: number
+          id: string
+          purpose: string
+          rejected_reason: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          created_at?: string
+          credit_score_at_application: number
+          id?: string
+          purpose: string
+          rejected_reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          created_at?: string
+          credit_score_at_application?: number
+          id?: string
+          purpose?: string
+          rejected_reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
