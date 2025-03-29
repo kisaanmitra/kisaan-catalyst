@@ -10,10 +10,39 @@ interface Message {
   timestamp: Date;
 }
 
-const ChatbotWidget: React.FC = () => {
+interface ChatbotWidgetProps {
+  widgetLanguage?: 'english' | 'hindi' | 'kannada';
+  translations?: {
+    title?: {
+      english: string;
+      hindi: string;
+      kannada: string;
+    };
+    placeholder?: {
+      english: string;
+      hindi: string;
+      kannada: string;
+    };
+    button?: {
+      english: string;
+      hindi: string;
+      kannada: string;
+    };
+    greeting?: {
+      english: string;
+      hindi: string;
+      kannada: string;
+    };
+  };
+}
+
+const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({ 
+  widgetLanguage = 'english',
+  translations
+}) => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      text: "नमस्ते! मैं आपका कृषि सहायक हूँ। आप मुझसे फसल, मौसम, या सरकारी योजनाओं के बारे में पूछ सकते हैं।",
+      text: translations?.greeting?.[widgetLanguage] || "नमस्ते! मैं आपका कृषि सहायक हूँ। आप मुझसे फसल, मौसम, या सरकारी योजनाओं के बारे में पूछ सकते हैं।",
       isBot: true,
       timestamp: new Date()
     }
@@ -87,12 +116,26 @@ const ChatbotWidget: React.FC = () => {
     alert(`Speaking: ${text}`);
   };
 
+  const getTitle = () => {
+    if (translations?.title) {
+      return translations.title[widgetLanguage];
+    }
+    return "AI किसान सहायक (Farmer Assistant)";
+  };
+
+  const getPlaceholder = () => {
+    if (translations?.placeholder) {
+      return translations.placeholder[widgetLanguage];
+    }
+    return "आप यहां टाइप कर सकते हैं या माइक आइकन पर क्लिक करके बोल सकते हैं...";
+  };
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-[400px]">
       <div className="bg-primary p-3 text-white">
         <h3 className="font-medium flex items-center">
           <Volume2 size={18} className="mr-2" />
-          AI किसान सहायक (Farmer Assistant)
+          {getTitle()}
         </h3>
       </div>
       
@@ -144,7 +187,7 @@ const ChatbotWidget: React.FC = () => {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="आप यहां टाइप कर सकते हैं या माइक आइकन पर क्लिक करके बोल सकते हैं..."
+            placeholder={getPlaceholder()}
             className="min-h-10 font-noto"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {

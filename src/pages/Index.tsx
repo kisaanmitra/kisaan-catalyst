@@ -420,22 +420,22 @@ const Index = () => {
               
               <TabsContent value="market-prices" className="mt-6">
                 <LiveDataWidget 
-                  widgetType="market" 
+                  widgetType="mandi" 
+                  language={language}
                   data={{
                     states: states,
                     crops: crops
                   }}
-                  language={language}
                 />
               </TabsContent>
               
               <TabsContent value="weather" className="mt-6">
                 <LiveDataWidget 
                   widgetType="weather" 
+                  language={language}
                   data={{
                     states: states
                   }}
-                  language={language}
                 />
               </TabsContent>
             </Tabs>

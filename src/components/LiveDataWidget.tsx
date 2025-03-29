@@ -27,10 +27,19 @@ const mockMandiData = {
 };
 
 interface LiveDataWidgetProps {
-  widgetType: 'weather' | 'mandi';
+  widgetType: 'weather' | 'mandi' | 'market';
+  language?: 'english' | 'hindi' | 'kannada';
+  data?: {
+    states?: string[];
+    crops?: string[];
+  };
 }
 
-const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ widgetType = 'weather' }) => {
+const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ 
+  widgetType = 'weather',
+  language = 'english',
+  data 
+}) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -153,6 +162,7 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ widgetType = 'weather' 
     </Card>
   );
 
+  // Treat 'market' and 'mandi' types the same way
   return widgetType === 'weather' ? renderWeatherWidget() : renderMandiWidget();
 };
 
