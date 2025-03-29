@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { VolumeUp, Send, Mic, MicOff } from 'lucide-react';
+import { Volume2, Send, Mic, MicOff } from 'lucide-react';
 
 interface Message {
   text: string;
@@ -91,7 +91,7 @@ const ChatbotWidget: React.FC = () => {
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-[400px]">
       <div className="bg-primary p-3 text-white">
         <h3 className="font-medium flex items-center">
-          <VolumeUp size={18} className="mr-2" />
+          <Volume2 size={18} className="mr-2" />
           AI किसान सहायक (Farmer Assistant)
         </h3>
       </div>
@@ -120,7 +120,7 @@ const ChatbotWidget: React.FC = () => {
                     className="text-xs opacity-70 hover:opacity-100"
                     aria-label="Read message aloud"
                   >
-                    <VolumeUp size={14} />
+                    <Volume2 size={14} />
                   </button>
                 )}
               </div>

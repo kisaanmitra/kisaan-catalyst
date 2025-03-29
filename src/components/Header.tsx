@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sun, Moon, VolumeUp } from 'lucide-react';
+import { Menu, X, Sun, Moon, Volume2 } from 'lucide-react';
 
 interface HeaderProps {
   toggleContrast: () => void;
@@ -55,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ toggleContrast, isHighContrast }) => {
               className="p-2 rounded-full text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 mr-1"
               aria-label="Voice Navigation"
             >
-              <VolumeUp size={20} />
+              <Volume2 size={20} />
             </button>
             
             <button 

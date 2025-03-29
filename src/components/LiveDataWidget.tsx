@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Cloud, Sun, Tint, Thermometer, ArrowDown, ArrowUp } from 'lucide-react';
+import { Cloud, Sun, Droplets, Thermometer, ArrowDown, ArrowUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Mock data for the widget
@@ -74,7 +74,7 @@ const LiveDataWidget: React.FC<LiveDataWidgetProps> = ({ widgetType }) => {
               <div className="text-center">
                 <p className="text-gray-500 text-xs">Humidity</p>
                 <div className="flex items-center justify-center">
-                  <Tint size={16} className="text-blue-500 mr-1" />
+                  <Droplets size={16} className="text-blue-500 mr-1" />
                   <p className="text-2xl font-bold">{mockWeatherData.humidity}%</p>
                 </div>
               </div>
