@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,7 +9,7 @@ import MapPlanner from '@/components/MapPlanner';
 import CreditTracker from '@/components/CreditTracker';
 import GovernmentScheme from '@/components/GovernmentScheme';
 import { Button } from "@/components/ui/button";
-import { Map, CreditCard, Cloud, Store, Calendar, FileText } from 'lucide-react';
+import { Map, CreditCard, Cloud, Store, FileText, Calendar } from 'lucide-react';
 
 const Index = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
@@ -176,10 +175,10 @@ const Index = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FeatureCard 
               title="Farm Planner" 
-              titleHindi="खेत की योजना"
+              englishTitle="खेत की योजना"
               description="GIS-based farm planning with soil health mapping, crop recommendations, and resource optimization."
               icon={Map}
-              color="primary"
+              color="bg-primary"
               buttonText="Plan Now"
               buttonHindi="योजना बनाएं"
               onClick={() => alert("Opening Farm Planner")}
@@ -187,10 +186,10 @@ const Index = () => {
             
             <FeatureCard 
               title="Credit Marketplace" 
-              titleHindi="क्रेडिट बाज़ार"
+              englishTitle="क्रेडिट बाज़ार"
               description="Buy seeds, fertilizers, and equipment using earned credits. Earn more credits for sustainable farming."
               icon={CreditCard}
-              color="secondary"
+              color="bg-secondary"
               buttonText="Shop Now"
               buttonHindi="खरीदें"
               onClick={() => alert("Opening Credit Marketplace")}
@@ -198,10 +197,10 @@ const Index = () => {
             
             <FeatureCard 
               title="Weather Alerts" 
-              titleHindi="मौसम अलर्ट"
+              englishTitle="मौसम अलर्ट"
               description="Get precise weather forecasts and timely alerts for your specific location to protect your crops."
               icon={Cloud}
-              color="primary"
+              color="bg-primary"
               buttonText="Set Alerts"
               buttonHindi="अलर्ट सेट करें"
               onClick={() => alert("Opening Weather Alerts")}
@@ -209,10 +208,10 @@ const Index = () => {
             
             <FeatureCard 
               title="Mandi Connect" 
-              titleHindi="मंडी कनेक्ट"
+              englishTitle="मंडी कनेक्ट"
               description="Direct connection to local markets with live pricing, demand forecasts, and logistics support."
               icon={Store}
-              color="secondary"
+              color="bg-secondary"
               buttonText="Connect"
               buttonHindi="जुड़ें"
               onClick={() => alert("Opening Mandi Connect")}
@@ -220,10 +219,10 @@ const Index = () => {
             
             <FeatureCard 
               title="Scheme Matcher" 
-              titleHindi="योजना खोजें"
+              englishTitle="योजना खोजें"
               description="Find government schemes and subsidies you're eligible for based on your location, crop, and farm size."
               icon={FileText}
-              color="primary"
+              color="bg-primary"
               buttonText="Find Schemes"
               buttonHindi="योजनाएं खोजें"
               onClick={() => alert("Opening Scheme Matcher")}
@@ -231,10 +230,10 @@ const Index = () => {
             
             <FeatureCard 
               title="Seasonal Calendar" 
-              titleHindi="मौसमी कैलेंडर"
+              englishTitle="मौसमी कैलेंडर"
               description="Personalized calendar with crop-specific timelines for sowing, irrigation, fertilization, and harvesting."
               icon={Calendar}
-              color="secondary"
+              color="bg-secondary"
               buttonText="View Calendar"
               buttonHindi="कैलेंडर देखें"
               onClick={() => alert("Opening Seasonal Calendar")}

@@ -9,7 +9,7 @@ interface FeatureCardProps {
   englishTitle?: string;
   description: string;
   englishDescription?: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   color: string;
   buttonText?: string;
   buttonHindi?: string;
@@ -21,7 +21,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   englishTitle,
   description,
   englishDescription,
-  icon,
+  icon: Icon,
   color,
   buttonText = "Learn More",
   buttonHindi,
@@ -32,7 +32,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
       <CardHeader className={color}>
         <div className="flex items-center space-x-2">
           <div className="p-2 rounded-full bg-white/90 text-primary">
-            {icon}
+            <Icon size={24} />
           </div>
           <div>
             <CardTitle className="text-lg">{title}</CardTitle>
