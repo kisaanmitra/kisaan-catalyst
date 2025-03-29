@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -421,7 +420,7 @@ const Index = () => {
               
               <TabsContent value="market-prices" className="mt-6">
                 <LiveDataWidget 
-                  type="market" 
+                  widgetType="market" 
                   data={{
                     states: states,
                     crops: crops
@@ -432,7 +431,7 @@ const Index = () => {
               
               <TabsContent value="weather" className="mt-6">
                 <LiveDataWidget 
-                  type="weather" 
+                  widgetType="weather" 
                   data={{
                     states: states
                   }}
@@ -522,7 +521,7 @@ const Index = () => {
         
         {/* Chat Bot */}
         <ChatbotWidget 
-          language={language} 
+          widgetLanguage={language} 
           translations={{
             title: {
               english: "KisaanMitra Assistant",

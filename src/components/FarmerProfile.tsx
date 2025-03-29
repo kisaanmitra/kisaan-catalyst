@@ -69,16 +69,21 @@ const FarmerProfile: React.FC<FarmerProfileProps> = ({
     try {
       setIsSubmitting(true);
       
+      // Ensure all required fields are included and properly typed
       const formattedValues = {
-        ...values,
+        name: values.name,
+        location: values.location,
         land_size: parseFloat(values.land_size),
+        crop_type: values.crop_type,
+        phone: values.phone,
+        address: values.address,
         user_id: user.id,
       };
       
       if (mode === 'create') {
         const { data, error } = await supabase
           .from('farmer_profiles')
-          .insert(formattedValues) // Fixed: Removed array brackets
+          .insert(formattedValues)
           .select();
           
         if (error) throw error;
@@ -90,7 +95,7 @@ const FarmerProfile: React.FC<FarmerProfileProps> = ({
         // Update existing profile
         const { data, error } = await supabase
           .from('farmer_profiles')
-          .update(formattedValues) // Fixed: Removed array brackets
+          .update(formattedValues)
           .eq('user_id', user.id)
           .select();
           

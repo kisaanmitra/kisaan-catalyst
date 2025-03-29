@@ -11,6 +11,7 @@ import LiveDataWidget from '@/components/LiveDataWidget';
 
 const Demo = () => {
   const [isHighContrast, setIsHighContrast] = useState(false);
+  const [language, setLanguage] = useState<'english' | 'hindi' | 'kannada'>('english');
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -19,7 +20,12 @@ const Demo = () => {
 
   return (
     <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
-      <Header toggleContrast={toggleContrast} isHighContrast={isHighContrast} />
+      <Header 
+        toggleContrast={toggleContrast} 
+        isHighContrast={isHighContrast}
+        language={language}
+        setLanguage={setLanguage}
+      />
       
       <main className="flex-grow bg-gray-50 dark:bg-gray-900 py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +55,7 @@ const Demo = () => {
                       आपके सवालों के उत्तर देने और सटीक कृषि सलाह देने के लिए हमारा AI सलाहकार
                     </p>
                   </div>
-                  <ChatbotWidget />
+                  <ChatbotWidget widgetLanguage={language} />
                 </TabsContent>
                 
                 <TabsContent value="map-planner" className="p-4 md:p-6">
@@ -83,7 +89,7 @@ const Demo = () => {
                       वास्तविक समय मौसम और मंडी मूल्य अपडेट प्राप्त करें
                     </p>
                   </div>
-                  <LiveDataWidget widgetType="weather" />
+                  <LiveDataWidget widgetType="weather" language={language} />
                 </TabsContent>
               </CardContent>
             </Card>
