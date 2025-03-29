@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { Send, Mic, MicOff, Volume2, Volume1 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Volume2, Send, Mic, MicOff } from 'lucide-react';
 
 interface Message {
   text: string;
@@ -50,69 +50,87 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Sample predefined responses
-  const responses = {
-    "बीज कब बोयें": "चावल के बीज बोने का सही समय जून-जुलाई के महीने में मानसून की शुरुआत के साथ होता है।",
-    "कीट नियंत्रण": "रसायनिक कीटनाशकों के बजाय जैविक कीटनाशकों का उपयोग करें। नीम का तेल या लहसुन का स्प्रे प्राकृतिक कीट नियंत्रण के लिए अच्छा है।",
-    "फसल बीमा": "प्रधान मंत्री फसल बीमा योजना के तहत आप अपनी फसल का बीमा करवा सकते हैं। अधिक जानकारी के लिए अपने नजदीकी कृषि कार्यालय से संपर्क करें।",
-    "मिट्टी परीक्षण": "मिट्टी परीक्षण के लिए अपने क्षेत्र के कृषि विज्ञान केंद्र से संपर्क करें। वे आपको मिट्टी का नमूना एकत्र करने और उसे परीक्षण के लिए भेजने में मदद करेंगे।",
-    "सब्सिडी": "खाद और बीज पर सब्सिडी प्राप्त करने के लिए आपको किसान क्रेडिट कार्ड और आधार कार्ड की जरूरत होगी। अपने ग्राम प्रधान या कृषि अधिकारी से संपर्क करें।"
+  
+  // Mock responses based on keywords
+  const mockResponses = {
+    'मौसम': 'आपके क्षेत्र में अगले 3 दिनों के लिए मौसम पूर्वानुमान यह है: आज - धूप, कल - आंशिक रूप से बादल, परसों - बारिश की संभावना।',
+    'फसल': 'इस मौसम में गेहूं, चना, और सरसों की बुवाई के लिए अच्छा समय है। क्या आप किसी विशेष फसल के बारे में जानकारी चाहते हैं?',
+    'योजना': 'किसानों के लिए प्रमुख सरकारी योजनाएँ हैं: प्रधानमंत्री किसान सम्मान निधि, प्रधानमंत्री फसल बीमा योजना, और किसान क्रेडिट कार्ड। किसी विशेष योजना के बारे में अधिक जानकारी के लिए पूछें।',
+    'बाजार': 'आपके निकटतम मंडी में वर्तमान कीमतें: गेहूं - ₹2150/क्विंटल, धान - ₹3200/क्विंटल, आलू - ₹1200/क्विंटल, प्याज - ₹1800/क्विंटल',
+    'weather': 'The weather forecast for your area for the next 3 days is: Today - Sunny, Tomorrow - Partly Cloudy, Day after - Chance of Rain.',
+    'crop': 'This season is good for planting wheat, chickpeas, and mustard. Would you like information about a specific crop?',
+    'scheme': 'Major government schemes for farmers include: PM Kisan Samman Nidhi, PM Crop Insurance Scheme, and Kisan Credit Card. Ask for more information about a specific scheme.',
+    'market': 'Current prices at your nearest mandi: Wheat - ₹2150/quintal, Rice - ₹3200/quintal, Potato - ₹1200/quintal, Onion - ₹1800/quintal',
   };
 
-  // Mock function to simulate voice recognition
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      // Simulate recording for 3 seconds then receiving a message
-      setTimeout(() => {
-        const randomQuestion = Object.keys(responses)[Math.floor(Math.random() * Object.keys(responses).length)];
-        setInput(randomQuestion);
-        setIsRecording(false);
-      }, 3000);
-    }
-  };
-
-  // Auto-scroll to bottom of messages
+  // Auto scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom();
   }, [messages]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
   const handleSendMessage = () => {
-    if (input.trim() === '') return;
-
+    if (!input.trim()) return;
+    
     // Add user message
-    const userMessage: Message = {
+    const userMessage = {
       text: input,
       isBot: false,
       timestamp: new Date()
     };
-    setMessages(prev => [...prev, userMessage]);
     
-    // Generate bot response
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    
+    // Simulate "typing" delay
     setTimeout(() => {
-      let botResponse = "मुझे यह समझ नहीं आया। कृपया दूसरे तरीके से पूछें।";
+      // Check if message contains any keywords
+      let botResponse = "मुझे यह समझ नहीं आया। कृपया फसल, मौसम, बाजार या सरकारी योजनाओं के बारे में पूछें।";
       
-      // Check for predefined responses
-      Object.entries(responses).forEach(([key, value]) => {
-        if (input.toLowerCase().includes(key.toLowerCase())) {
-          botResponse = value;
+      if (widgetLanguage === 'english') {
+        botResponse = "I didn't understand that. Please ask about crops, weather, markets, or government schemes.";
+      }
+      
+      // Check for keywords in Hindi and English
+      for (const [keyword, response] of Object.entries(mockResponses)) {
+        if (input.toLowerCase().includes(keyword.toLowerCase())) {
+          botResponse = response;
+          break;
         }
-      });
+      }
       
-      const botMessage: Message = {
+      // Add bot response
+      const botMessage = {
         text: botResponse,
         isBot: true,
         timestamp: new Date()
       };
+      
       setMessages(prev => [...prev, botMessage]);
     }, 1000);
-    
-    setInput('');
   };
-
-  const readMessage = (text: string) => {
-    // This would connect to a text-to-speech API
+  
+  const toggleRecording = () => {
+    setIsRecording(!isRecording);
+    // In a real implementation, this would use the Web Speech API
+    if (!isRecording) {
+      // Start recording
+      alert("Voice recording started. This is a mock implementation.");
+      setTimeout(() => {
+        setInput("मौसम का पूर्वानुमान बताएं");
+        setIsRecording(false);
+      }, 2000);
+    } else {
+      // Stop recording
+      alert("Voice recording stopped");
+    }
+  };
+  
+  const speakText = (text: string) => {
+    // In a real implementation, this would use the Web Speech API
     alert(`Speaking: ${text}`);
   };
 
@@ -139,51 +157,55 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
         </h3>
       </div>
       
-      <div className="flex-grow overflow-y-auto p-4 space-y-3">
-        {messages.map((message, index) => (
-          <div 
-            key={index} 
-            className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
-          >
+      <div className="flex-grow overflow-y-auto p-4">
+        <div className="space-y-4">
+          {messages.map((message, index) => (
             <div 
-              className={`rounded-lg px-4 py-2 max-w-[75%] font-noto ${
-                message.isBot 
-                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200' 
-                  : 'bg-primary text-white'
-              }`}
+              key={index} 
+              className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
             >
-              <p className="text-sm">{message.text}</p>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-xs opacity-70">
-                  {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </span>
-                {message.isBot && (
-                  <button 
-                    onClick={() => readMessage(message.text)}
-                    className="text-xs opacity-70 hover:opacity-100"
-                    aria-label="Read message aloud"
-                  >
-                    <Volume2 size={14} />
-                  </button>
-                )}
+              <div 
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  message.isBot 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none' 
+                    : 'bg-primary text-white rounded-tr-none'
+                }`}
+              >
+                <p className="text-sm font-noto">{message.text}</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-xs opacity-70">
+                    {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </span>
+                  
+                  {message.isBot && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6" 
+                      onClick={() => speakText(message.text)}
+                    >
+                      <Volume1 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
       
-      <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex space-x-2">
-          <Button
-            type="button"
-            variant="outline"
+      <div className="border-t border-gray-200 dark:border-gray-700 p-3">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
             size="icon"
-            onClick={toggleRecording}
             className={isRecording ? 'bg-red-100 text-red-600 border-red-300' : ''}
+            onClick={toggleRecording}
           >
             {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
           </Button>
+          
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -196,11 +218,16 @@ const ChatbotWidget: React.FC<ChatbotWidgetProps> = ({
               }
             }}
           />
-          <Button onClick={handleSendMessage}>
+          
+          <Button 
+            variant="default" 
+            size="icon" 
+            onClick={handleSendMessage}
+            disabled={!input.trim()}
+          >
             <Send size={18} />
           </Button>
         </div>
-        <p className="text-gray-500 text-xs mt-2 text-center">हिंदी या English में अपना सवाल पूछें</p>
       </div>
     </div>
   );

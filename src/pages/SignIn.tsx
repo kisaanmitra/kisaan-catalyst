@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,10 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -33,6 +34,32 @@ const SignIn = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkSession();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -50,24 +77,42 @@ const SignIn = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      // In a real implementation, this would call an API endpoint
-      console.log("Signing in with", values);
+      setAuthError(null);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Success
-      toast({
-        title: "लॉगिन सफल (Login Successful)",
-        description: "आपका स्वागत है (Welcome back)",
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
       });
       
-      navigate("/");
-    } catch (error) {
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.user) {
+        toast({
+          title: "लॉगिन सफल (Login Successful)",
+          description: "आपका स्वागत है (Welcome back)",
+        });
+        
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      
+      // Handle specific error messages
+      let errorMessage = "लॉगिन विफल (Login Failed)";
+      if (error.message === "Invalid login credentials") {
+        errorMessage = "अमान्य ईमेल या पासवर्ड (Invalid email or password)";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "ईमेल पुष्टि नहीं हुई (Email not confirmed)";
+      }
+      
+      setAuthError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "लॉगिन विफल (Login Failed)",
-        description: "कृपया अपना ईमेल और पासवर्ड जांचें (Please check your email and password)",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -78,9 +123,9 @@ const SignIn = () => {
     <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
       <Header toggleContrast={toggleContrast} isHighContrast={isHighContrast} />
       
-      <main className="flex-grow flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+      <main className="flex-grow flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="text-center mb-6">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 किसानमित्र में आपका स्वागत है
@@ -89,6 +134,12 @@ const SignIn = () => {
                 Sign in to your KisaanMitra account
               </p>
             </div>
+
+            {authError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                {authError}
+              </div>
+            )}
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -137,15 +188,12 @@ const SignIn = () => {
 
                 <Button
                   type="submit"
-                  className="w-full font-noto bg-primary hover:bg-primary-dark"
+                  className="w-full font-noto bg-primary hover:bg-primary/90 transition-colors"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       लोड हो रहा है...
                     </span>
                   ) : (

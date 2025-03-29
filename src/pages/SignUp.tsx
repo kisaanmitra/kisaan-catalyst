@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,10 @@ import {
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Mail, Lock, User, Phone, MapPin, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, ArrowRight, Loader2 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -42,6 +43,31 @@ const SignUp = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkSession();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const toggleContrast = () => {
     setIsHighContrast(!isHighContrast);
@@ -62,24 +88,63 @@ const SignUp = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      // In a real implementation, this would call an API endpoint
-      console.log("Signing up with", values);
+      setAuthError(null);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Success
-      toast({
-        title: "पंजीकरण सफल (Registration Successful)",
-        description: "आपका स्वागत है (Welcome to KisaanMitra)",
+      // Register the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            name: values.name,
+          },
+        },
       });
+
+      if (authError) {
+        throw authError;
+      }
+
+      if (authData && authData.user) {
+        // Create farmer profile
+        const { error: profileError } = await supabase
+          .from('farmer_profiles')
+          .insert({
+            user_id: authData.user.id,
+            name: values.name,
+            phone: values.phone,
+            location: values.location,
+            address: values.location, // Using location as default address
+            crop_type: 'General', // Default crop type
+            land_size: 1, // Default land size
+          });
+
+        if (profileError) {
+          console.error("Profile creation error:", profileError);
+        }
+
+        toast({
+          title: "पंजीकरण सफल (Registration Successful)",
+          description: "आपका स्वागत है (Welcome to KisaanMitra)",
+        });
+
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error("Registration error:", error);
       
-      navigate("/");
-    } catch (error) {
+      // Handle specific error messages
+      let errorMessage = "पंजीकरण विफल (Registration Failed)";
+      if (error.message.includes("already registered")) {
+        errorMessage = "ईमेल पहले से पंजीकृत है (Email already registered)";
+      }
+      
+      setAuthError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "पंजीकरण विफल (Registration Failed)",
-        description: "कृपया अपनी जानकारी जांचें और पुनः प्रयास करें (Please check your information and try again)",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -90,9 +155,9 @@ const SignUp = () => {
     <div className={`min-h-screen flex flex-col ${isHighContrast ? 'high-contrast' : ''}`}>
       <Header toggleContrast={toggleContrast} isHighContrast={isHighContrast} />
       
-      <main className="flex-grow flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
+      <main className="flex-grow flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="text-center mb-6">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                 किसानमित्र से जुड़ें
@@ -101,6 +166,12 @@ const SignUp = () => {
                 Create your KisaanMitra account
               </p>
             </div>
+
+            {authError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+                {authError}
+              </div>
+            )}
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -212,15 +283,12 @@ const SignUp = () => {
 
                 <Button
                   type="submit"
-                  className="w-full font-noto bg-primary hover:bg-primary-dark"
+                  className="w-full font-noto bg-primary hover:bg-primary/90 transition-colors"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       लोड हो रहा है...
                     </span>
                   ) : (
