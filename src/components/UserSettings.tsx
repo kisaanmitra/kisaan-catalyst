@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +14,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 type Profile = {
   id?: string;
-  username?: string;
-  full_name?: string;
-  avatar_url?: string;
-  bio?: string;
+  name?: string;
+  profile_image?: string;
+  address?: string;
   location?: string;
-  phone_number?: string;
-  farm_size?: string;
-  farm_type?: string;
+  phone?: string;
+  land_size?: number;
+  crop_type?: string;
   credit_score?: number;
 };
 
@@ -45,9 +45,9 @@ const UserSettings = () => {
       if (!user?.id) return;
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('farmer_profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .single();
         
       if (error) {
@@ -56,8 +56,8 @@ const UserSettings = () => {
       
       if (data) {
         setProfile(data);
-        if (data.avatar_url) {
-          setAvatarPreview(data.avatar_url);
+        if (data.profile_image) {
+          setAvatarPreview(data.profile_image);
         }
       }
     } catch (error) {
@@ -78,18 +78,20 @@ const UserSettings = () => {
       
       if (!user?.id) return;
       
-      // Convert credit_score to a number
-      const credit_score = Number(profile.credit_score || 0);
+      // Convert credit_score to a number if it exists
+      const credit_score = profile.credit_score ? Number(profile.credit_score) : undefined;
+      const land_size = profile.land_size ? Number(profile.land_size) : undefined;
       
       // Update profile
       const { error } = await supabase
-        .from('profiles')
+        .from('farmer_profiles')
         .update({
           ...profile,
           credit_score,
+          land_size,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id);
+        .eq('user_id', user.id);
         
       if (error) {
         throw error;
@@ -98,7 +100,7 @@ const UserSettings = () => {
       // Upload avatar if changed
       if (avatar) {
         const fileExt = avatar.name.split('.').pop();
-        const filePath = `${user.id}/avatar.${fileExt}`;
+        const filePath = `${user.id}/profile_image.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
           .from('avatars')
@@ -115,13 +117,13 @@ const UserSettings = () => {
           
         // Update profile with avatar URL
         await supabase
-          .from('profiles')
-          .update({ avatar_url: data.publicUrl })
-          .eq('id', user.id);
+          .from('farmer_profiles')
+          .update({ profile_image: data.publicUrl })
+          .eq('user_id', user.id);
           
         setProfile({
           ...profile,
-          avatar_url: data.publicUrl,
+          profile_image: data.publicUrl,
         });
       }
       
@@ -156,17 +158,11 @@ const UserSettings = () => {
   };
 
   const handleChangeProfile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.name === 'credit_score') {
-      setProfile({
-        ...profile,
-        [e.target.name]: Number(e.target.value)
-      });
-    } else {
-      setProfile({
-        ...profile,
-        [e.target.name]: e.target.value
-      });
-    }
+    const { name, value } = e.target;
+    setProfile({
+      ...profile,
+      [name]: value
+    });
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -202,7 +198,7 @@ const UserSettings = () => {
             <div className="flex items-center space-x-4 mb-6">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={avatarPreview || undefined} />
-                <AvatarFallback>{profile.full_name?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{profile.name?.charAt(0) || user?.email?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
                 <Label htmlFor="avatar" className="cursor-pointer text-sm font-medium text-primary hover:underline">
@@ -220,33 +216,22 @@ const UserSettings = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="name">Full Name</Label>
                 <Input
-                  id="username"
-                  name="username"
-                  value={profile.username || ''}
-                  onChange={handleChangeProfile}
-                  placeholder="Your username"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  value={profile.full_name || ''}
+                  id="name"
+                  name="name"
+                  value={profile.name || ''}
                   onChange={handleChangeProfile}
                   placeholder="Your full name"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="phone_number">Phone Number</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input
-                  id="phone_number"
-                  name="phone_number"
-                  value={profile.phone_number || ''}
+                  id="phone"
+                  name="phone"
+                  value={profile.phone || ''}
                   onChange={handleChangeProfile}
                   placeholder="Your phone number"
                 />
@@ -263,15 +248,14 @@ const UserSettings = () => {
                 />
               </div>
               
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  name="bio"
-                  value={profile.bio || ''}
-                  onChange={handleTextareaChange}
-                  placeholder="Tell us about yourself"
-                  rows={4}
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={profile.address || ''}
+                  onChange={handleChangeProfile}
+                  placeholder="Your address"
                 />
               </div>
             </div>
@@ -280,23 +264,23 @@ const UserSettings = () => {
           <TabsContent value="preferences" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="farm_size">Farm Size (acres)</Label>
+                <Label htmlFor="land_size">Farm Size (acres)</Label>
                 <Input
-                  id="farm_size"
-                  name="farm_size"
-                  value={profile.farm_size || ''}
+                  id="land_size"
+                  name="land_size"
+                  value={profile.land_size || ''}
                   onChange={handleChangeProfile}
                   placeholder="Farm size in acres"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="farm_type">Farm Type</Label>
+                <Label htmlFor="crop_type">Farm Type</Label>
                 <Select 
-                  value={profile.farm_type || ''} 
-                  onValueChange={(value) => handleSelectChange('farm_type', value)}
+                  value={profile.crop_type || ''} 
+                  onValueChange={(value) => handleSelectChange('crop_type', value)}
                 >
-                  <SelectTrigger id="farm_type">
+                  <SelectTrigger id="crop_type">
                     <SelectValue placeholder="Select farm type" />
                   </SelectTrigger>
                   <SelectContent>
